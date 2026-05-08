@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SakuraTok - Hệ Thống MXH Sakura</title>
+    <style>
+        :root { --pink: #ff4d6d; --light-pink: #fff5f7; }
+        body { margin: 0; background-color: var(--light-pink); font-family: 'Segoe UI', sans-serif; color: #333; }
+        
+        /* Header & Sakura Rain */
+        .header { background: white; padding: 15px; text-align: center; border-bottom: 2px solid #ffb7c5; color: var(--pink); font-weight: bold; position: sticky; top:0; z-index: 100;}
+        
+        /* Profile Section */
+        .profile-container { background: white; padding: 25px 20px; text-align: center; border-bottom: 1px solid #ffb7c5; position: relative; }
+        .avatar-main { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--pink); box-shadow: 0 4px 10px rgba(255,77,109,0.2); }
+        .user-name { font-size: 22px; font-weight: bold; margin: 12px 0 5px 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .bio { color: #777; font-size: 14px; max-width: 80%; margin: 0 auto 15px auto; }
+        .edit-btn { position: absolute; top: 20px; right: 20px; font-size: 22px; cursor: pointer; background: none; border: none; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1)); }
+
+        /* Form Đăng Bài */
+        .upload-section { background: #fff; margin: 15px; padding: 20px; border-radius: 15px; border: 2px dashed var(--pink); }
+        input, textarea, .btn-main { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #eee; box-sizing: border-box; font-family: inherit; }
+        .btn-main { background: var(--pink); color: white; border: none; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.95); }
+
+        /* Progress Bar */
+        #progBox { display: none; background: #f0f0f0; border-radius: 20px; height: 10px; margin: 10px 0; overflow: hidden; }
+        #progBar { width: 0%; height: 100%; background: var(--pink); transition: width 0.1s; }
+
+        /* Post Display (TikTok Style) */
+        .post { background: #000; width: 92%; max-width: 400px; margin: 20px auto; border-radius: 20px; position: relative; overflow: hidden; color: white; aspect-ratio: 9/16; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .post img, .post video { width: 100%; height: 100%; object-fit: cover; }
+        .verified { width: 18px; }
+        .post-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
+        
+        /* Stats Sidebar */
+        .stats-side { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        .stat-item { text-align: center; }
+        .stat-icon { font-size: 28px; margin-bottom: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .stat-num { font-size: 13px; font-weight: bold; }
+
+        /* Modal Popup */
+        #editModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.3); z-index: 200; width: 85%; max-width: 320px; }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 150; backdrop-filter: blur(3px); }
+    </style>
+</head>
+<body>
+
+<div class="header">🌸 SAKURATOK</div>
+
+<div class="profile-container">
+    <button class="edit-btn" onclick="openModal()">⚙️</button>
+    <img src="https://i.imgur.com/8Km9tLL.png" id="displayAvatar" class="avatar-main">
+    <div class="user-name">
+        <span id="displayName">Tên Của Mày</span>
+        <img class="verified" src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg">
+    </div>
+    <div class="bio" id="displayBio">Nhấn bánh răng để đổi tiểu sử nè mày ơi... 🌸</div>
+</div>
+
+<div class="upload-section">
+    <b style="color: var(--pink)">Đăng clip / Ảnh mới:</b>
+    <input type="file" id="videoFile" accept="image/*,video/*">
+    <div id="progBox"><div id="progBar"></div></div>
+    <button class="btn-main" onclick="startUpload()">TẢI LÊN & KIỂM DUYỆT</button>
+</div>
+
+<div id="mainFeed"></div>
+
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+<div id="editModal">
+    <h3 style="margin-top:0; color:var(--pink)">Chỉnh sửa cá nhân</h3>
+    <input type="text" id="editName" placeholder="Tên hiển thị mới...">
+    <textarea id="editBio" placeholder="Tiểu sử mới..." rows="3"></textarea>
+    <p style="font-size:12px; margin-bottom:5px">Chọn Avatar mới:</p>
+    <input type="file" id="editAvatarFile" accept="image/*">
+    <button class="btn-main" onclick="saveProfile()">LƯU LẠI</button>
+</div>
+
+<script>
+    // --- CÀI ĐẶT Tên Của Mày Ở ĐÂY ---
+    const MY_NAME = "Tên Của Mày"; 
+
+    function openModal() { document.getElementById('editModal').style.display='block'; document.getElementById('overlay').style.display='block'; }
+    function closeModal() { document.getElementById('editModal').style.display='none'; document.getElementById('overlay').style.display='none'; }
+
+    function saveProfile() {
+        const name = document.getElementById('editName').value;
+        const bio = document.getElementById('editBio').value;
+        const avt = document.getElementById('editAvatarFile').files[0];
+        if(name) document.getElementById('displayName').innerText = name;
+        if(bio) document.getElementById('displayBio').innerText = bio;
+        if(avt) document.getElementById('displayAvatar').src = URL.createObjectURL(avt);
+        closeModal();
+    }
+
+    function startUpload() {
+        const file = document.getElementById('videoFile').files[0];
+        if(!file) return alert("Chọn cái gì đó rồi mới đăng được chớ!");
+        
+        document.getElementById('progBox').style.display = 'block';
+        let w = 0;
+        let t = setInterval(() => {
+            w += Math.floor(Math.random() * 5) + 1;
+            if(w >= 100) {
+                w = 100; clearInterval(t);
+                setTimeout(() => { postToFeed(file); document.getElementById('progBox').style.display='none'; document.getElementById('progBar').style.width='0'; }, 500);
+            }
+            document.getElementById('progBar').style.width = w + '%';
+        }, 50);
+    }
+
+    function postToFeed(file) {
+        const feed = document.getElementById('mainFeed');
+        const url = URL.createObjectURL(file);
+        const name = document.getElementById('displayName').innerText;
+        const avt = document.getElementById('displayAvatar').src;
+        const id = "p" + Date.now();
+
+        const html = `
+            <div class="post" id="${id}">
+                ${file.type.includes('video') ? `<video src="${url}" autoplay loop muted></video>` : `<img src="${url}">`}
+                <div class="stats-side">
+                    <div class="stat-item"><div class="stat-icon">❤️</div><div class="stat-num" id="l-${id}">0</div></div>
+                    <div class="stat-item"><div class="stat-icon">👁️</div><div class="stat-num" id="v-${id}">0</div></div>
+                    <div class="stat-item"><div class="stat-icon">↪️</div><div class="stat-num">Share</div></div>
+                </div>
+                <div class="post-overlay">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+                        <img src="${avt}" style="width:35px; height:35px; border-radius:50%; border:1px solid white">
+                        <b>@${name} ${name === MY_NAME ? '<img class="verified" src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg">' : ''}</b>
+                    </div>
+                    <p style="font-size:13px; margin:0; opacity:0.9" id="status-${id}">🔍 Đang quét nội dung...</p>
+                </div>
+            </div>
+        `;
+        feed.insertAdjacentHTML('afterbegin', html);
+
+        // SAU 10 GIÂY BẮT ĐẦU BUFF VIEW CHẠY TỪ TỪ
+        setTimeout(() => {
+            document.getElementById(`status-${id}`).innerText = "Đã kiểm duyệt 100% ✅";
+            let currentView = 0;
+            let currentLike = 0;
+            
+            // Hàm cộng dồn liên tục
+            let liveBuff = setInterval(() => {
+                if(name === MY_NAME) {
+                    currentView += Math.floor(Math.random() * 50000) + 10000; // Nhảy số cực nhanh
+                    currentLike += Math.floor(Math.random() * 5000) + 1000;
+                } else {
+                    currentView += Math.floor(Math.random() * 3); // Nhảy cực chậm
+                    currentLike += (Math.random() > 0.8 ? 1 : 0);
+                }
+
+                document.getElementById(`v-${id}`).innerText = formatNum(currentView);
+                document.getElementById(`l-${id}`).innerText = formatNum(currentLike);
+
+                // Dừng lại khi đạt con số khủng (ví dụ 99 triệu)
+                if(currentView > 99000000) clearInterval(liveBuff);
+            }, 100); // Cứ 0.1 giây lại nhảy số một lần cho nó mượt
+        }, 10000);
+    }
+
+    function formatNum(num) {
+        if(num >= 1000000) return (num/1000000).toFixed(1) + 'M';
+        if(num >= 1000) return (num/1000).toFixed(1) + 'K';
+        return num;
+    }
+</script>
+
+</body>
+</html>
