@@ -3,136 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SakuraTok God Mode - ICEbreaker</title>
+    <title>SakuraTok Pro - ICEbreaker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --tt-red: #fe2c55; --tt-cyan: #25f4ee; }
-        body { margin: 0; background: #000; font-family: sans-serif; color: white; overflow: hidden; }
+        :root { --sakura: #ffb7c5; --tt-red: #fe2c55; }
+        body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+        
+        /* Màn hình đăng nhập một lần */
+        #loginOverlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; align-items: center; justify-content: center; }
+        .login-box { background: white; color: black; padding: 30px; border-radius: 20px; width: 85%; text-align: center; }
+        .login-btn { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; cursor: pointer; }
+
+        /* Khung chứa Video */
         #mainFeed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
         .post { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; background: #000; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .side-bar { position: absolute; right: 10px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 10; }
-        .avt-post { width: 48px; height: 48px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
-        .nav-bottom { position: fixed; bottom: 0; width: 100%; height: 65px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid #333; z-index: 1000; }
-        #profilePage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; overflow-y: auto; }
-        .admin-btn { position: absolute; top: 20px; right: 20px; font-size: 25px; cursor: pointer; color: #444; }
-        #adminDashboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; width: 90%; padding: 20px; border-radius: 15px; z-index: 3000; border: 2px solid var(--tt-red); }
-        .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
-        .grid-item { position: relative; aspect-ratio: 3/4; background: #111; border: 0.1px solid #222; }
-        .grid-item video { width: 100%; height: 100%; object-fit: cover; }
-        .view-tag { position: absolute; bottom: 5px; left: 5px; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        .btn-adm { background: var(--tt-red); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 5px; }
+
+        /* Nút trên Video */
+        .side-bar { position: absolute; right: 12px; bottom: 100px; display: flex; flex-direction: column; gap: 18px; align-items: center; z-index: 100; }
+        .btn-act { text-align: center; }
+        .btn-act i { font-size: 32px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.8)); }
+        .label { font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .ui-info { position: absolute; bottom: 85px; left: 15px; right: 80px; z-index: 100; pointer-events: none; text-shadow: 1px 1px 5px #000; }
+
+        /* Menu dưới cùng */
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; height: 65px; background: black; display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid #333; z-index: 5000; }
+        .nav-item { text-align: center; font-size: 10px; color: #888; }
+        .nav-item.active { color: white; }
+
+        /* Trang Hồ sơ */
+        #profilePage { display: none; position: fixed; inset: 0; background: black; z-index: 4000; overflow-y: auto; padding-bottom: 80px; }
+        .prof-header { padding: 40px 20px 20px; text-align: center; border-bottom: 0.5px solid #333; position: relative; }
+        .avt-main { width: 95px; height: 95px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
+        .prof-tabs { display: flex; border-bottom: 0.5px solid #333; }
+        .tab { flex: 1; text-align: center; padding: 12px; color: #888; font-weight: bold; }
+        .tab.active { color: white; border-bottom: 2px solid white; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 25px; border-radius: 15px; z-index: 6000; width: 85%; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5500; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #333; color: white; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2>Chào mừng mày đến SakuraTok 🌸</h2>
+        <p style="color:#666; font-size:14px">Đăng nhập một lần duy nhất để bắt đầu</p>
+        <div class="login-btn" onclick="startLogin('Google')"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="18"> Tiếp tục với Google</div>
+        <div class="login-btn" onclick="startLogin('TikTok')"><i class="fab fa-tiktok"></i> Tiếp tục với TikTok</div>
+    </div>
+</div>
+
 <div id="mainFeed"></div>
 
 <div class="nav-bottom">
-    <div onclick="showHome()"><i class="fas fa-home" style="font-size:20px"></i></div>
-    <div onclick="openUp()"><i class="fas fa-plus-square" style="font-size: 30px;"></i></div>
-    <div onclick="showProfile()"><i class="fas fa-user" style="font-size:20px"></i></div>
+    <div class="nav-item active" onclick="showHome()"><i class="fas fa-home"></i><br>Trang chủ</div>
+    <div class="nav-item" onclick="showUpload()"><i class="fas fa-plus-square" style="font-size:26px"></i></div>
+    <div class="nav-item" onclick="showProfile()"><i class="fas fa-user"></i><br>Hồ sơ</div>
 </div>
 
 <div id="profilePage">
-    <i class="fas fa-bars admin-btn" onclick="askAdmin()"></i>
-    <div style="text-align:center; padding: 60px 20px 30px;">
-        <img src="https://i.imgur.com/8Km9tLL.png" class="avt-post" style="width:100px; height:100px;">
-        <h3 id="pName">@ICEbreaker ✔️</h3>
-        <div style="display:flex; justify-content:center; gap:25px; margin-top:15px;">
-            <div><b id="pFlwer">0</b><br><small style="color:#888">Follower</small></div>
-            <div><b id="pLike">0</b><br><small style="color:#888">Thích</small></div>
+    <div class="prof-header">
+        <i class="fas fa-bars" style="position:absolute; right:20px; top:20px; font-size:22px" onclick="askAdmin()"></i>
+        <img id="myAvt" src="https://i.imgur.com/8Km9tLL.png" class="avt-main">
+        <h3 id="pNameDisplay">@ICEbreaker</h3>
+        <p id="pBioDisplay" style="color:#aaa; font-size:14px">SakuraTok Admin 🌸</p>
+        <div style="display:flex; justify-content:center; gap:25px; margin:15px 0;">
+            <div><b id="pFlwer">0</b><br><small style="color:#666">Follower</small></div>
+            <div><b id="pLike">0</b><br><small style="color:#666">Thích</small></div>
         </div>
-        <button style="margin-top:20px; background:#222; border:none; color:white; padding:8px 25px; border-radius:5px; font-weight:bold;">Chỉnh sửa hồ sơ</button>
+        <button class="login-btn" style="background:#222; color:white; border:none; width:auto; padding:8px 30px; margin:0 auto;" onclick="openEdit()">Chỉnh sửa hồ sơ</button>
     </div>
-    <div class="video-grid" id="myGrid"></div>
+    <div class="prof-tabs">
+        <div class="tab active">Video</div>
+        <div class="tab">Đã Follow</div>
+    </div>
+    <div id="myGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1px;"></div>
 </div>
 
-<div id="adminDashboard">
-    <h3 style="color:var(--tt-red); margin-top:0;">MÁY CHỦ QUẢN TRỊ VIÊN</h3>
-    <label>Chọn tài khoản:</label>
-    <select id="userList"></select>
-    <input type="number" id="setViews" placeholder="Số View muốn tăng tới (triệu/tỷ)">
-    <input type="number" id="setLikes" placeholder="Số Tim muốn tăng tới">
-    <button class="btn-adm" onclick="applyAdmin()">KÍCH HOẠT TĂNG VIEW VÔ LOGIC</button>
-    <button class="btn-adm" style="background:#444" onclick="banUser()">KHÓA TÀI KHOẢN (18+/SEX)</button>
-    <button style="background:none; border:none; color:#888; margin-top:15px; width:100%" onclick="closeAdmin()">Hủy bỏ</button>
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+<div class="modal" id="editModal">
+    <h3 style="margin-top:0">Chỉnh sửa hồ sơ</h3>
+    <input type="text" id="newName" placeholder="Tên hiển thị mới">
+    <input type="text" id="newBio" placeholder="Tiểu sử mới">
+    <button class="login-btn" style="background:var(--tt-red); color:white; border:none" onclick="saveEdit()">LƯU THAY ĐỔI</button>
 </div>
 
 <script>
     const ADMIN_PASS = "ICEbreaker2014admin";
     const ADMIN_NAME = "ICEbreaker";
     
-    let posts = JSON.parse(localStorage.getItem('sk_final_posts')) || [];
-    let banned = JSON.parse(localStorage.getItem('sk_final_banned')) || [];
+    let posts = JSON.parse(localStorage.getItem('sk_v8_posts')) || [];
+    let userData = JSON.parse(localStorage.getItem('sk_v8_user'));
+
+    // Kiểm tra đăng nhập khi vừa vào web
+    window.onload = function() {
+        if (!userData) {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        } else {
+            init();
+        }
+    };
+
+    function startLogin(type) {
+        let pass = prompt(`Thiết lập mật khẩu SakuraTok cho tài khoản ${type}:`);
+        if(pass) {
+            userData = { name: "@ICEbreaker", bio: "SakuraTok Admin 🌸", pass: pass, logged: true };
+            localStorage.setItem('sk_v8_user', JSON.stringify(userData));
+            document.getElementById('loginOverlay').style.display = 'none';
+            init();
+        }
+    }
 
     function init() {
-        if(posts.length < 4) createInitialBots();
+        if(posts.length < 3) createInitialBots();
         renderFeed();
         renderGrid();
         updateUI();
-        setInterval(engineLoop, 1000); // Chạy vòng lặp logic mỗi giây
+        setInterval(engineLoop, 1000);
     }
 
     function createInitialBots() {
         const botData = [
-            {n: "Rap_Vibe_99", v: "https://v.redd.it/3z600pjk95x61/DASH_720.mp4", vw: 1200, l: 200},
-            {n: "Sakura_Dance", v: "https://v.redd.it/f9344itj69y61/DASH_480.mp4", vw: 45000, l: 8000},
-            {n: "Baddie_Girl", v: "https://v.redd.it/u2m5s0f1g9y61/DASH_1080.mp4", vw: 950000, l: 150000}
+            {n: "Sakura_Girl", v: "https://v.redd.it/3z600pjk95x61/DASH_720.mp4", vw: 500, l: 100},
+            {n: "Rap_Vibe_Pro", v: "https://v.redd.it/f9344itj69y61/DASH_480.mp4", vw: 12000, l: 2000}
         ];
-        botData.forEach(b => {
-            posts.push({
-                id: Math.random(), author: b.n, url: b.v, 
-                views: b.vw, likes: b.l, targetViews: b.vw, 
-                avt: `https://i.pravatar.cc/150?u=${b.n}`
-            });
-        });
+        botData.forEach(b => posts.push({id: Math.random(), author: b.n, url: b.v, views: b.vw, likes: b.l, avt: `https://i.pravatar.cc/150?u=${b.n}`}));
         save();
     }
 
-    // VÒNG LẶP TĂNG VIEW LIÊN TỤC
     function engineLoop() {
         posts.forEach(p => {
-            // Logic cho ICEbreaker: Tăng mãi mãi
             if(p.author === ADMIN_NAME) {
-                p.views += Math.floor(Math.random() * 5000) + 1000;
-                p.likes += Math.floor(Math.random() * 500) + 100;
-            }
-            
-            // Logic Vô Logic khi Admin chỉnh view cho người khác
-            if(p.targetViews && p.views < p.targetViews) {
-                let diff = p.targetViews - p.views;
-                p.views += Math.ceil(diff / 20); // Tăng vọt lên trong vài giây
-                p.likes += Math.ceil((p.targetLikes - p.likes) / 20 || 0);
+                p.views += Math.floor(Math.random() * 2000) + 500;
+                p.likes += Math.floor(Math.random() * 200) + 50;
             }
         });
         updateUI();
         save();
-        // Cập nhật số hiển thị trên màn hình nếu đang xem
-        const activeLabels = document.querySelectorAll('.like-count');
-        activeLabels.forEach((el, i) => {
-            let pid = el.getAttribute('data-id');
-            let post = posts.find(x => x.id == pid);
-            if(post) el.innerText = formatNum(post.likes);
-        });
     }
 
     function renderFeed() {
         const feed = document.getElementById('mainFeed');
         feed.innerHTML = '';
         posts.slice().reverse().forEach(p => {
-            if(banned.includes(p.author)) return;
             feed.innerHTML += `
                 <div class="post">
-                    <video src="${p.url}" loop autoplay muted playsinline></video>
+                    <video src="${p.url}" loop autoplay muted playsinline onclick="this.paused?this.play():this.pause()"></video>
                     <div class="side-bar">
-                        <img src="${p.avt || 'https://i.imgur.com/8Km9tLL.png'}" class="avt-post">
-                        <div class="btn-act"><i class="fas fa-heart"></i><div class="like-count" data-id="${p.id}">${formatNum(p.likes)}</div></div>
-                        <div class="btn-act"><i class="fas fa-comment-dots"></i><div style="font-size:12px">99K</div></div>
-                        <div class="btn-act"><i class="fas fa-share"></i><div style="font-size:12px">Chia sẻ</div></div>
+                        <div style="position:relative; margin-bottom:10px;">
+                            <img src="${p.avt || 'https://i.imgur.com/8Km9tLL.png'}" style="width:45px;height:45px;border-radius:50%;border:2px solid white">
+                            <div style="position:absolute; bottom:-5px; left:50%; transform:translateX(-50%); background:var(--tt-red); border-radius:50%; width:18px; height:18px; font-size:12px; display:flex; align-items:center; justify-content:center">+</div>
+                        </div>
+                        <div class="btn-act" onclick="addLike('${p.id}')"><i class="fas fa-heart"></i><div class="label">${formatNum(p.likes)}</div></div>
+                        <div class="btn-act"><i class="fas fa-comment-dots"></i><div class="label">88K</div></div>
+                        <div class="btn-act"><i class="fas fa-share"></i><div class="label">Share</div></div>
                     </div>
-                    <div class="ui-info"><b>@${p.author}</b><p>SakuraTok System Active v6.0 ✅</p></div>
+                    <div class="ui-info"><b>@${p.author}</b><p>SakuraTok Trending 🌸 #xuhuong</p></div>
                 </div>`;
         });
     }
@@ -141,86 +170,60 @@
         const grid = document.getElementById('myGrid');
         grid.innerHTML = '';
         posts.filter(p => p.author === ADMIN_NAME).forEach(p => {
-            grid.innerHTML += `<div class="grid-item"><video src="${p.url}"></video><div class="view-tag">▶ <span id="v-${p.id}">${formatNum(p.views)}</span></div></div>`;
+            grid.innerHTML += `<div style="position:relative; aspect-ratio:3/4; background:#111; border:0.5px solid #222;"><video src="${p.url}" style="width:100%;height:100%;object-fit:cover"></video><div style="position:absolute; bottom:5px; left:5px; font-size:11px; font-weight:bold;">▶ ${formatNum(p.views)}</div></div>`;
         });
+    }
+
+    function openEdit() {
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function saveEdit() {
+        userData.name = document.getElementById('newName').value || userData.name;
+        userData.bio = document.getElementById('newBio').value || userData.bio;
+        localStorage.setItem('sk_v8_user', JSON.stringify(userData));
+        updateUI();
+        closeAll();
+        alert("Hồ sơ đã được cập nhật!");
+    }
+
+    function updateUI() {
+        if(!userData) return;
+        document.getElementById('pNameDisplay').innerText = userData.name;
+        document.getElementById('pBioDisplay').innerText = userData.bio;
+        let myPosts = posts.filter(p => p.author === ADMIN_NAME);
+        let likes = myPosts.reduce((a,b) => a + b.likes, 0);
+        document.getElementById('pLike').innerText = formatNum(likes);
+        document.getElementById('pFlwer').innerText = formatNum(Math.floor(likes/2.8));
     }
 
     function askAdmin() {
-        let p = prompt("TRUY CẬP MÁY CHỦ TỐI CAO:");
-        if(p === ADMIN_PASS) {
-            document.getElementById('adminDashboard').style.display = 'block';
-            const sel = document.getElementById('userList');
-            sel.innerHTML = '';
-            let users = [...new Set(posts.map(x => x.author))];
-            users.forEach(u => sel.innerHTML += `<option value="${u}">${u}</option>`);
-        } else { alert("Mật khẩu sai! Quyền truy cập bị từ chối."); }
-    }
-
-    function applyAdmin() {
-        const user = document.getElementById('userList').value;
-        const v = parseInt(document.getElementById('setViews').value);
-        const l = parseInt(document.getElementById('setLikes').value);
-        posts.forEach(p => {
-            if(p.author === user) {
-                p.targetViews = v;
-                p.targetLikes = l;
-            }
-        });
-        alert("Đã kích hoạt vòng lặp tăng view vô logic!");
-        closeAdmin();
-    }
-
-    function banUser() {
-        const user = document.getElementById('userList').value;
-        if(user === ADMIN_NAME) return alert("Không thể khóa chính mình!");
-        if(confirm(`Khóa tài khoản ${user} vì nội dung 18+/Sex?`)) {
-            banned.push(user);
-            localStorage.setItem('sk_final_banned', JSON.stringify(banned));
-            location.reload();
+        if(prompt("NHẬP MẬT KHẨU MÁY CHỦ:") === ADMIN_PASS) {
+            alert("Đã kích hoạt chế độ Admin Tối Cao!");
         }
     }
 
-    function openUp() {
-        let input = document.createElement('input');
-        input.type = 'file';
-        input.onchange = e => {
+    function showUpload() {
+        let inp = document.createElement('input');
+        inp.type = 'file';
+        inp.onchange = e => {
             let file = e.target.files[0];
-            if(file.name.toLowerCase().match(/sex|18+|porn|nude/)) return alert("Hệ thống bảo mật đã chặn file nhạy cảm!");
-            let reader = new FileReader();
-            reader.onload = r => {
-                posts.push({id: Date.now(), author: ADMIN_NAME, url: r.target.result, views: 100000, likes: 20000, avt: 'https://i.imgur.com/8Km9tLL.png'});
+            let r = new FileReader();
+            r.onload = ev => {
+                posts.push({id: Date.now(), author: ADMIN_NAME, url: ev.target.result, views: 100000, likes: 20000});
                 save(); location.reload();
             };
-            reader.readAsDataURL(file);
+            r.readAsDataURL(file);
         };
-        input.click();
+        inp.click();
     }
 
-    function formatNum(n) {
-        if(n >= 1000000000) return (n/1000000000).toFixed(1) + 'B';
-        if(n >= 1000000) return (n/1000000).toFixed(1) + 'M';
-        if(n >= 1000) return (n/1000).toFixed(1) + 'K';
-        return n;
-    }
-
-    function save() { localStorage.setItem('sk_final_posts', JSON.stringify(posts)); }
-    function updateUI() {
-        let myPosts = posts.filter(p => p.author === ADMIN_NAME);
-        let totalLikes = myPosts.reduce((a,b) => a + b.likes, 0);
-        let totalFlw = Math.floor(totalLikes / 2.5);
-        document.getElementById('pLike').innerText = formatNum(totalLikes);
-        document.getElementById('pFlwer').innerText = formatNum(totalFlw);
-        myPosts.forEach(p => {
-            let el = document.getElementById(`v-${p.id}`);
-            if(el) el.innerText = formatNum(p.views);
-        });
-    }
-
+    function formatNum(n) { if(n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if(n >= 1000) return (n/1000).toFixed(1) + 'K'; return n; }
+    function save() { localStorage.setItem('sk_v8_posts', JSON.stringify(posts)); }
     function showProfile() { document.getElementById('profilePage').style.display='block'; }
     function showHome() { document.getElementById('profilePage').style.display='none'; }
-    function closeAdmin() { document.getElementById('adminDashboard').style.display='none'; }
-
-    window.onload = init;
+    function closeAll() { document.querySelectorAll('.modal, .overlay').forEach(el => el.style.display='none'); }
 </script>
 </body>
 </html>
