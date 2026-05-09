@@ -3,183 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sakura Chill Zone - ICEbreaker</title>
+    <title>Sakura Chill Zone V2 - ICEbreaker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --sakura-pink: #ffb7c5;
-            --glass: rgba(255, 255, 255, 0.15);
-        }
+        :root { --sakura-pink: #ffb7c5; --glass: rgba(255, 255, 255, 0.15); }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background: #000; overflow: hidden; }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%; width: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(to bottom, #ffdde1, #ee9ca7);
-            overflow: hidden;
-        }
-
-        /* Hình nền khu vườn phía sau */
-        .background-garden {
-            position: fixed; inset: 0;
-            background: url('https://images.unsplash.com/photo-1528164344705-4754268799af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            filter: blur(4px);
-            z-index: -1;
-        }
+        /* Hình nền */
+        .bg { position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1528164344705-4754268799af?auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; filter: brightness(0.8); z-index: -1; }
 
         /* Cánh hoa rơi */
-        .sakura {
-            position: absolute; background-color: var(--sakura-pink);
-            border-radius: 100% 0 100% 0;
-            opacity: 0.7; pointer-events: none;
-            animation: fall linear infinite;
-        }
+        .sakura { position: absolute; background-color: var(--sakura-pink); border-radius: 100% 0 100% 0; opacity: 0.6; pointer-events: none; animation: fall linear infinite; }
+        @keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); } 100% { transform: translateY(110vh) rotate(360deg) translateX(50px); } }
 
-        @keyframes fall {
-            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); }
-            100% { transform: translateY(110vh) translateX(100px) rotate(360deg); }
-        }
+        .container { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
 
-        /* Nội dung chính */
-        .container {
-            height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box;
-        }
-
-        .header { text-align: center; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.2); margin-bottom: 30px; }
-        .header h1 { margin: 0; font-size: 28px; }
-        .header p { opacity: 0.9; font-size: 14px; }
-
-        /* Các ô kính (Cards) */
+        /* Thẻ Chill */
         .chill-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            width: 100%; max-width: 350px;
-            padding: 20px; margin-bottom: 15px;
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 20px;
+            width: 100%; max-width: 350px; padding: 20px; margin-bottom: 15px;
             display: flex; align-items: center; justify-content: space-between;
-            transition: transform 0.3s ease;
-            position: relative; overflow: hidden;
+            transition: 0.3s; color: white;
         }
-
-        .chill-card:hover { transform: scale(1.02); }
 
         .info { display: flex; align-items: center; gap: 15px; }
-        .info i { font-size: 24px; color: white; }
-        .info .text b { display: block; font-size: 16px; color: white; }
-        .info .text span { font-size: 12px; color: rgba(255,255,255,0.8); }
+        .info i { font-size: 24px; color: var(--sakura-pink); }
+        .text b { display: block; font-size: 16px; }
+        .text span { font-size: 12px; opacity: 0.8; }
 
         .play-btn {
-            width: 40px; height: 40px; border-radius: 50%;
+            width: 45px; height: 45px; border-radius: 50%;
             background: white; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: #ee9ca7; font-size: 18px;
+            color: #ee9ca7; font-size: 18px; display: flex; align-items: center; justify-content: center;
         }
+        .play-btn.playing { background: var(--sakura-pink); color: white; }
 
-        /* Bướm bay animation */
-        .butterfly {
-            position: absolute; width: 20px; pointer-events: none;
-            animation: fly 5s ease-in-out infinite;
-            opacity: 0.6;
-        }
-
-        @keyframes fly {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(20px, -20px) rotate(20deg); }
-        }
-
-        /* Player dưới cùng */
-        .footer-player {
-            position: fixed; bottom: 20px; width: 85%; max-width: 400px;
-            background: var(--glass); backdrop-filter: blur(10px);
-            padding: 15px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2);
-            display: flex; align-items: center; gap: 15px;
-        }
-
-        .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; }
-        .progress { width: 40%; height: 100%; background: white; border-radius: 2px; }
+        /* Bướm bay */
+        .butterfly { position: absolute; font-size: 14px; color: #fff; opacity: 0.5; animation: fly 4s ease-in-out infinite; pointer-events: none; }
+        @keyframes fly { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(15px, -15px); } }
     </style>
 </head>
 <body>
 
-<div class="background-garden"></div>
+<div class="bg"></div>
 
 <div class="container">
     <div class="header">
         <h1>Sakura Chill Zone</h1>
-        <p>白桜チルゾーン</p>
-        <small>Thư giãn, nghe nhạc và cảm nhận</small>
-    </div>
-
-    <div class="chill-card">
-        <div class="info">
-            <i class="fas fa-seedling"></i>
-            <div class="text">
-                <b>HOA ANH ĐÀO</b>
-                <span>Cánh hoa rơi nhẹ nhàng</span>
-            </div>
-        </div>
-        <button class="play-btn" onclick="toggleSound('cherry')"><i class="fas fa-play"></i></button>
-        <i class="fas fa-dove butterfly" style="top: 10px; right: 50px;"></i>
+        <p>Thư giãn theo cách của mày 🌸</p>
     </div>
 
     <div class="chill-card">
         <div class="info">
             <i class="fas fa-music"></i>
-            <div class="text">
-                <b>NHẠC LO-FI SAKURA</b>
-                <span>Chill Beats: Piano & Sitar</span>
-            </div>
+            <div class="text"><b>PIANO SAKURA</b><span>Nhạc nhẹ nhàng thư giãn</span></div>
         </div>
-        <button class="play-btn" onclick="toggleSound('lofi')"><i class="fas fa-play"></i></button>
+        <button class="play-btn" onclick="togglePlay('piano', this)"><i class="fas fa-play"></i></button>
+        <i class="fas fa-paper-plane butterfly" style="top:5px; right:60px"></i>
+    </div>
+
+    <div class="chill-card">
+        <div class="info">
+            <i class="fas fa-headphones"></i>
+            <div class="text"><b>LO-FI BEATS</b><span>Nhạc học tập & làm việc</span></div>
+        </div>
+        <button class="play-btn" onclick="togglePlay('lofi', this)"><i class="fas fa-play"></i></button>
     </div>
 
     <div class="chill-card">
         <div class="info">
             <i class="fas fa-leaf"></i>
-            <div class="text">
-                <b>CÂY CỎ & HOA LÁ</b>
-                <span>Tiếng gió và chim hót</span>
-            </div>
+            <div class="text"><b>THIÊN NHIÊN</b><span>Tiếng chim hót & gió</span></div>
         </div>
-        <button class="play-btn" onclick="toggleSound('nature')"><i class="fas fa-play"></i></button>
-        <i class="fas fa-bug butterfly" style="bottom: 10px; left: 100px;"></i>
-    </div>
-
-    <div class="footer-player">
-        <i class="fas fa-pause" style="color: white;"></i>
-        <div class="progress-bar"><div class="progress"></div></div>
-        <i class="fas fa-volume-up" style="color: white;"></i>
+        <button class="play-btn" onclick="togglePlay('nature', this)"><i class="fas fa-play"></i></button>
+        <i class="fas fa-dove butterfly" style="bottom:5px; left:20px"></i>
     </div>
 </div>
 
+<audio id="piano" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+<audio id="lofi" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio>
+<audio id="nature" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
+
 <script>
-    // Tạo cánh hoa rơi tự động
+    // Logic điều khiển nhạc riêng biệt
+    function togglePlay(id, btn) {
+        const audio = document.getElementById(id);
+        const icon = btn.querySelector('i');
+        
+        // Tắt tất cả nhạc khác nếu mày muốn nghe 1 cái duy nhất (Xóa đống này nếu muốn nghe chồng lên nhau)
+        document.querySelectorAll('audio').forEach(a => {
+            if (a.id !== id) {
+                a.pause();
+                a.currentTime = 0;
+            }
+        });
+        document.querySelectorAll('.play-btn').forEach(b => {
+            if (b !== btn) {
+                b.classList.remove('playing');
+                b.querySelector('i').className = 'fas fa-play';
+            }
+        });
+
+        // Bật/Tắt bài đang chọn
+        if (audio.paused) {
+            audio.play();
+            icon.className = 'fas fa-pause';
+            btn.classList.add('playing');
+        } else {
+            audio.pause();
+            icon.className = 'fas fa-play';
+            btn.classList.remove('playing');
+        }
+    }
+
+    // Cánh hoa rơi
     function createSakura() {
         const sakura = document.createElement('div');
-        sakura.classList.add('sakura');
+        sakura.className = 'sakura';
         sakura.style.left = Math.random() * 100 + 'vw';
-        sakura.style.animationDuration = Math.random() * 3 + 2 + 's';
-        sakura.style.width = sakura.style.height = Math.random() * 10 + 5 + 'px';
+        sakura.style.width = sakura.style.height = (Math.random() * 8 + 5) + 'px';
+        sakura.style.animationDuration = (Math.random() * 3 + 3) + 's';
         document.body.appendChild(sakura);
-
-        setTimeout(() => { sakura.remove(); }, 5000);
+        setTimeout(() => sakura.remove(), 5000);
     }
-    setInterval(createSakura, 300);
-
-    // Xử lý âm thanh (Giả lập)
-    function toggleSound(type) {
-        alert("Đang phát âm thanh: " + type + "\n(Hãy thêm link file mp3 của mày vào để nghe thật nhé!)");
-        const btns = document.querySelectorAll('.play-btn i');
-        btns.forEach(b => {
-            b.classList.toggle('fa-play');
-            b.classList.toggle('fa-pause');
-        });
-    }
+    setInterval(createSakura, 200);
 </script>
 
 </body>
