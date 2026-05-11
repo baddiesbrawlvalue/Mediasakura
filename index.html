@@ -5,25 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICEbreaker🌸 AI</title>
     <style>
-        /* Giao diện chuẩn dân chơi code */
+        /* Giao diện chuẩn Dark Mode cực ngầu */
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #0f0f0f; 
-            color: #e0e0e0; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: #0b0e11; 
+            color: #ffffff; 
             margin: 0; 
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
         }
         header { 
-            background: #1e1e1e; 
+            background: #1e2327; 
             padding: 15px; 
             text-align: center; 
-            font-size: 1.5rem; 
+            font-size: 1.4rem; 
             font-weight: bold; 
             color: #ff85a2; 
             border-bottom: 2px solid #333;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         #chat-box { 
             flex-grow: 1; 
@@ -32,39 +32,47 @@
             display: flex; 
             flex-direction: column; 
             gap: 15px;
+            scroll-behavior: smooth;
         }
-        .message { max-width: 80%; padding: 12px 16px; border-radius: 15px; line-height: 1.4; }
-        .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 2px; }
-        .bot { align-self: flex-start; background: #333; color: #ff85a2; border-bottom-left-radius: 2px; border: 1px solid #444; }
+        /* Style tin nhắn */
+        .message { max-width: 85%; padding: 12px 18px; border-radius: 20px; line-height: 1.5; font-size: 16px; position: relative; }
+        .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 4px; }
+        .bot { align-self: flex-start; background: #2a2e33; color: #ff85a2; border-bottom-left-radius: 4px; border: 1px solid #444; }
         
+        /* Khu vực nhập liệu */
         .input-area { 
             padding: 20px; 
-            background: #1e1e1e; 
+            background: #1e2327; 
             display: flex; 
             gap: 10px; 
             border-top: 1px solid #333;
         }
         input { 
             flex-grow: 1; 
-            padding: 12px; 
-            border-radius: 8px; 
+            padding: 14px; 
+            border-radius: 12px; 
             border: 1px solid #444; 
-            background: #2d2d2d; 
+            background: #2c3136; 
             color: white; 
             outline: none;
+            font-size: 16px;
         }
-        input:focus { border-color: #ff85a2; }
+        input:focus { border-color: #ff85a2; box-shadow: 0 0 5px #ff85a2; }
         button { 
-            padding: 10px 20px; 
+            padding: 10px 25px; 
             background: #ff85a2; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 12px; 
             color: white; 
             font-weight: bold; 
             cursor: pointer; 
-            transition: 0.3s;
+            transition: all 0.2s;
         }
-        button:hover { background: #ff4f7b; }
+        button:hover { background: #ff4f7b; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+
+        /* Hiệu ứng gõ chữ của Bot */
+        .typing { font-style: italic; font-size: 14px; color: #888; }
     </style>
 </head>
 <body>
@@ -72,59 +80,79 @@
 <header>ICEbreaker 🌸 AI</header>
 
 <div id="chat-box">
-    <div class="message bot">Chào mày, tao là ICEbreaker🌸 đây. Nay muốn phá băng chuyện gì nói nghe coi?</div>
+    <div class="message bot">Chào mày, ICEbreaker🌸 đây! Hôm nay có gì vui không, kể tao nghe để tao "phá băng" giúp mày nào!</div>
 </div>
 
 <div class="input-area">
-    <input type="text" id="user-input" placeholder="Nhập tin nhắn..." onkeypress="handleKeyPress(event)">
-    <button onclick="sendMessage()">Gửi</button>
+    <input type="text" id="user-input" placeholder="Viết gì đó đi mày..." autocomplete="off">
+    <button id="send-btn">Gửi</button>
 </div>
 
 <script type="module">
+    // Import thư viện từ Google
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-    // MÀY DÁN CÁI KEY MỚI LẤY VÀO DƯỚI ĐÂY NÈ
+    // 1. DÁN API KEY CỦA MÀY VÀO ĐÂY (GIỮ NGUYÊN DẤU NGOẶC KÉP)
     const API_KEY = "AIzaSyDyhGiqcYqYujZy44XxS_vAG2ioyGM4m0A"; 
+    
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-    window.sendMessage = async function() {
-        const input = document.getElementById("user-input");
-        const chatBox = document.getElementById("chat-box");
-        const userText = input.value.trim();
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
 
-        if (!userText) return;
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
 
-        // Hiển thị tin nhắn của mày
-        chatBox.innerHTML += `<div class="message user">${userText}</div>`;
-        input.value = "";
+        // Hiện tin nhắn của mày
+        appendMessage(text, 'user');
+        userInput.value = "";
+
+        // Hiện hiệu ứng đang chờ
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "message bot typing";
+        typingDiv.innerText = "ICEbreaker🌸 đang suy nghĩ...";
+        chatBox.appendChild(typingDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
+            // SỬA LỖI 404: Dùng tên model đầy đủ
+            // Nếu vẫn lỗi 404, mày hãy thử đổi "gemini-1.5-flash-latest" thành "gemini-pro"
             const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash",
-                // Thiết lập để nó biết nó tên là ICEbreaker
-                systemInstruction: "Tên của bạn là ICEbreaker🌸. Bạn là một trợ lý thông minh, thân thiện nhưng có phần cá tính. Hãy trả lời bằng tiếng Việt."
+                model: "gemini-1.5-flash-latest" 
             });
 
-            const result = await model.generateContent(userText);
-            const response = await result.response;
-            const botText = response.text();
+            const prompt = `Bạn tên là ICEbreaker🌸. Bạn là một chatbot cá tính, hài hước và dùng ngôn ngữ thân mật (mày, tao) để trò chuyện với người dùng Việt Nam. Nội dung: ${text}`;
 
-            // Hiển thị tin nhắn của bot
-            chatBox.innerHTML += `<div class="message bot">${botText}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const botResponse = response.text();
+
+            // Xóa hiệu ứng chờ và hiện câu trả lời
+            chatBox.removeChild(typingDiv);
+            appendMessage(botResponse, 'bot');
 
         } catch (error) {
-            console.error(error);
-            chatBox.innerHTML += `<div class="message bot" style="color: #ff4f7b;">Lỗi rồi mày: ${error.message}</div>`;
+            chatBox.removeChild(typingDiv);
+            console.error("Lỗi rồi:", error);
+            appendMessage("Lỗi rồi mày ơi: " + error.message, 'bot');
         }
     }
 
-    window.handleKeyPress = function(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
+    function appendMessage(msg, sender) {
+        const div = document.createElement("div");
+        div.className = `message ${sender}`;
+        div.innerText = msg;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
+
+    // Sự kiện nhấn nút hoặc Enter
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
 </script>
 
 </body>
