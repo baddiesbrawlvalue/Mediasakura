@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ICEbreaker🌸 PRO</title>
+    <title>ICEbreaker🌸 PRO AI</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; padding: 0;
             background-color: #fff0f5;
             font-family: -apple-system, system-ui, sans-serif;
-            height: 100vh;
-            display: flex; flex-direction: column;
+            height: 100vh; display: flex; flex-direction: column;
             overflow: hidden;
         }
 
-        /* Hoa rơi */
+        /* Hiệu ứng cánh hoa rơi */
         .sakura {
             position: absolute; top: -10%; background: #ffb7c5;
             border-radius: 100% 0 100% 100%;
@@ -23,59 +22,63 @@
         }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
+        /* Header & Key Input */
         header {
             padding: 15px; text-align: center;
             background: white; border-bottom: 2px solid #ffb7c5;
             color: #d85971; font-weight: bold; z-index: 10;
         }
+        #key-box {
+            padding: 8px 15px; background: #fffafb;
+            border-bottom: 1px solid #ffb7c5; z-index: 10;
+        }
+        #api-key {
+            width: 100%; padding: 8px; border-radius: 10px;
+            border: 1px solid #ffb7c5; font-size: 12px; outline: none;
+        }
 
+        /* Cửa sổ Chat */
         #chat-window {
             flex: 1; overflow-y: auto; padding: 15px;
             display: flex; flex-direction: column; gap: 12px;
-            z-index: 10; padding-bottom: 80px; /* Chừa chỗ cho thanh input */
+            z-index: 10; padding-bottom: 80px;
         }
-
         .msg {
-            max-width: 80%; padding: 12px 16px; border-radius: 20px;
+            max-width: 85%; padding: 12px 16px; border-radius: 20px;
             font-size: 15px; line-height: 1.4; position: relative;
         }
-
         .user-msg {
             align-self: flex-end; background: #d85971; color: white;
             border-bottom-right-radius: 4px;
         }
-
         .ai-msg {
             align-self: flex-start; background: white; color: #333;
             border: 1px solid #ffb7c5; border-bottom-left-radius: 4px;
         }
 
-        /* THANH NHẬP LIỆU - ĐÃ FIX */
+        /* Khung chứa Code */
+        pre {
+            background: #282c34; color: #abb2bf; padding: 10px;
+            border-radius: 10px; font-size: 13px; overflow-x: auto;
+            margin: 10px 0; border: 1px solid #444;
+        }
+
+        /* Thanh nhập liệu ghim đáy */
         .input-box {
             position: fixed; bottom: 0; left: 0; width: 100%;
             padding: 12px; background: white;
             display: flex; align-items: center;
             border-top: 1px solid #ffb7c5; z-index: 100;
         }
-
-        input {
+        #user-input {
             flex: 1; border: 1px solid #ffb7c5;
             padding: 12px 18px; border-radius: 25px;
-            outline: none; font-size: 16px; background: #fffafb;
+            outline: none; font-size: 16px;
         }
-
         #send-btn {
             background: #d85971; color: white; border: none;
-            padding: 10px 18px; margin-left: 10px;
-            border-radius: 20px; font-weight: bold;
-            cursor: pointer; transition: 0.2s;
-        }
-
-        #send-btn:active { transform: scale(0.9); }
-
-        pre {
-            background: #282c34; color: #abb2bf; padding: 10px;
-            border-radius: 10px; font-size: 13px; overflow-x: auto;
+            padding: 10px 20px; margin-left: 10px;
+            border-radius: 20px; font-weight: bold; cursor: pointer;
         }
     </style>
 </head>
@@ -83,57 +86,105 @@
 
 <header>ICEbreaker🌸 PRO</header>
 
+<div id="key-box">
+    <input type="password" id="api-key" placeholder="gen-lang-client-0923127067">
+</div>
+
 <div id="chat-window">
-    <div class="msg ai-msg">Thấy nút GỬI chưa mày? Tao ghim nó dưới đáy rồi đó. Hỏi code Lua đi tao cân hết!</div>
+    <div class="msg ai-msg">Chào mày! Tao là ICEbreaker🌸. Dán API Key vào ô trên rồi hỏi code Lua Roblox đi, tao cân hết!</div>
 </div>
 
 <div class="input-box">
-    <input type="text" id="user-input" placeholder="Nhắn gì đó cho tao...">
+    <input type="text" id="user-input" placeholder="Nhắn tin cho AI...">
     <button id="send-btn" onclick="handleSend()">GỬI</button>
 </div>
 
 <script>
-    // Hiệu ứng hoa
+    // 1. Hiệu ứng hoa rơi
     for(let i=0; i<15; i++) {
         let flower = document.createElement('div');
         flower.className = 'sakura';
         flower.style.left = Math.random() * 100 + 'vw';
         flower.style.width = flower.style.height = Math.random() * 7 + 5 + 'px';
         flower.style.animationDuration = Math.random() * 4 + 3 + 's';
+        flower.style.animationDelay = Math.random() * 5 + 's';
         document.body.appendChild(flower);
     }
 
     const chatWindow = document.getElementById('chat-window');
-    const input = document.getElementById('user-input');
+    const userInput = document.getElementById('user-input');
+    const apiKeyInput = document.getElementById('api-key');
 
-    function handleSend() {
-        const text = input.value.trim();
-        if(!text) return;
-
-        addMessage(text, 'user-msg');
-        input.value = '';
-
-        // Giả lập trả lời
-        setTimeout(() => {
-            let reply = "Mày muốn làm game baddie trên Roblox bằng Lua hả? Đây là lệnh tạo Part lấp lánh (Sparkles) cho xịn nè:";
-            if (text.toLowerCase().includes('lua')) {
-                reply += "<pre>local p = Instance.new('Part', game.Workspace)\np.Size = Vector3.new(4,1,4)\nlocal s = Instance.new('Sparkles', p)\ns.SparkleColor = Color3.fromRGB(255, 183, 197)</pre>";
-            } else {
-                reply = "gen-lang-client-0923127067";
-            }
-            addMessage(reply, 'ai-msg');
-        }, 600);
-    }
-
-    function addMessage(content, className) {
+    // 2. Hàm thêm tin nhắn vào màn hình
+    function addMessage(content, className, id = null) {
         const div = document.createElement('div');
         div.className = `msg ${className}`;
+        if(id) div.id = id;
         div.innerHTML = content;
         chatWindow.appendChild(div);
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    input.addEventListener("keypress", (e) => { if (e.key === "Enter") handleSend(); });
+    // 3. Hàm xử lý gửi tin nhắn & Gọi API
+    async function handleSend() {
+        const text = userInput.value.trim();
+        const key = apiKeyInput.value.trim();
+
+        if(!text) return;
+        if(!key) {
+            alert("Mày chưa dán API Key kìa, lấy đâu ra não mà trả lời!");
+            return;
+        }
+
+        addMessage(text, 'user-msg');
+        userInput.value = '';
+
+        const loadingId = "loading-" + Date.now();
+        addMessage("🌸 ICEbreaker đang viết code...", "ai-msg", loadingId);
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        {role: "system", content: "Mày là ICEbreaker, AI chuyên gia về Roblox Lua. Nói chuyện kiểu thân mật mày tao với người dùng Việt Nam."},
+                        {role: "user", content: text}
+                    ],
+                    temperature: 0.8
+                })
+            });
+
+            const data = await response.json();
+            const loadingMsg = document.getElementById(loadingId);
+            if(loadingMsg) loadingMsg.remove();
+
+            if (data.choices && data.choices[0]) {
+                let aiReply = data.choices[0].message.content;
+                // Format lại các đoạn code cho đẹp
+                aiReply = aiReply.replace(/```(?:lua)?([\s\S]*?)
+```/g, '<pre>$1</pre>');
+                aiReply = aiReply.replace(/\n/g, '<br>'); // Giữ xuống dòng
+                addMessage(aiReply, 'ai-msg');
+            } else {
+                addMessage("Lỗi API rồi mày! Check lại Key hoặc tiền trong acc nhé.", "ai-msg");
+            }
+
+        } catch (error) {
+            const loadingMsg = document.getElementById(loadingId);
+            if(loadingMsg) loadingMsg.remove();
+            addMessage("Mạng bị quái gì rồi, không gọi AI được mày ơi!", "ai-msg");
+        }
+    }
+
+    // Nhấn Enter để gửi cho lẹ
+    userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSend();
+    });
 </script>
 
 </body>
