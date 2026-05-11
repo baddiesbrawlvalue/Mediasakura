@@ -3,189 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ICEbreaker🌸 PRO AI</title>
+    <title>ICEbreaker🌸 PRO</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; padding: 0;
-            background-color: #fff0f5;
-            font-family: -apple-system, system-ui, sans-serif;
-            height: 100vh; display: flex; flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Hiệu ứng cánh hoa rơi */
-        .sakura {
-            position: absolute; top: -10%; background: #ffb7c5;
-            border-radius: 100% 0 100% 100%;
-            animation: fall linear infinite; pointer-events: none; z-index: 1;
-        }
+        body { margin: 0; background-color: #fff0f5; font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .sakura { position: absolute; top: -10%; background: #ffb7c5; border-radius: 100% 0 100% 100%; animation: fall linear infinite; pointer-events: none; z-index: 1; }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-
-        /* Header & Key Input */
-        header {
-            padding: 15px; text-align: center;
-            background: white; border-bottom: 2px solid #ffb7c5;
-            color: #d85971; font-weight: bold; z-index: 10;
-        }
-        #key-box {
-            padding: 8px 15px; background: #fffafb;
-            border-bottom: 1px solid #ffb7c5; z-index: 10;
-        }
-        #api-key {
-            width: 100%; padding: 8px; border-radius: 10px;
-            border: 1px solid #ffb7c5; font-size: 12px; outline: none;
-        }
-
-        /* Cửa sổ Chat */
-        #chat-window {
-            flex: 1; overflow-y: auto; padding: 15px;
-            display: flex; flex-direction: column; gap: 12px;
-            z-index: 10; padding-bottom: 80px;
-        }
-        .msg {
-            max-width: 85%; padding: 12px 16px; border-radius: 20px;
-            font-size: 15px; line-height: 1.4; position: relative;
-        }
-        .user-msg {
-            align-self: flex-end; background: #d85971; color: white;
-            border-bottom-right-radius: 4px;
-        }
-        .ai-msg {
-            align-self: flex-start; background: white; color: #333;
-            border: 1px solid #ffb7c5; border-bottom-left-radius: 4px;
-        }
-
-        /* Khung chứa Code */
-        pre {
-            background: #282c34; color: #abb2bf; padding: 10px;
-            border-radius: 10px; font-size: 13px; overflow-x: auto;
-            margin: 10px 0; border: 1px solid #444;
-        }
-
-        /* Thanh nhập liệu ghim đáy */
-        .input-box {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            padding: 12px; background: white;
-            display: flex; align-items: center;
-            border-top: 1px solid #ffb7c5; z-index: 100;
-        }
-        #user-input {
-            flex: 1; border: 1px solid #ffb7c5;
-            padding: 12px 18px; border-radius: 25px;
-            outline: none; font-size: 16px;
-        }
-        #send-btn {
-            background: #d85971; color: white; border: none;
-            padding: 10px 20px; margin-left: 10px;
-            border-radius: 20px; font-weight: bold; cursor: pointer;
-        }
+        header { padding: 15px; text-align: center; background: white; border-bottom: 2px solid #ffb7c5; color: #d85971; font-weight: bold; z-index: 10; }
+        #key-config { padding: 10px; background: #fffafb; border-bottom: 1px solid #ffb7c5; z-index: 10; display: flex; gap: 5px; }
+        #api-key { flex: 1; padding: 8px; border-radius: 10px; border: 1px solid #ffb7c5; font-size: 12px; outline: none; }
+        #save-key { background: #d85971; color: white; border: none; border-radius: 10px; padding: 0 10px; font-size: 11px; cursor: pointer; }
+        #chat-window { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; z-index: 10; padding-bottom: 80px; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; }
+        .user-msg { align-self: flex-end; background: #d85971; color: white; border-bottom-right-radius: 4px; }
+        .ai-msg { align-self: flex-start; background: white; color: #333; border: 1px solid #ffb7c5; border-bottom-left-radius: 4px; }
+        pre { background: #282c34; color: #abb2bf; padding: 10px; border-radius: 10px; font-size: 13px; overflow-x: auto; margin: 10px 0; white-space: pre-wrap; word-break: break-all; }
+        .input-box { position: fixed; bottom: 0; width: 100%; padding: 12px; background: white; display: flex; border-top: 1px solid #ffb7c5; z-index: 100; }
+        #user-input { flex: 1; border: 1px solid #ffb7c5; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
+        #send-btn { background: #d85971; color: white; border: none; padding: 10px 20px; margin-left: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>ICEbreaker🌸 PRO</header>
 
-<div id="key-box">
-    <input type="password" id="api-key" placeholder="gen-lang-client-0923127067">
+<div id="key-config">
+    <input type="password" id="api-key" placeholder="AIzaSyBfoLI4hPFecDMQEor4ockt86YHQZlhIo8">
+    <button id="save-key" onclick="saveKey()">LƯU KEY</button>
 </div>
 
 <div id="chat-window">
-    <div class="msg ai-msg">Chào mày! Tao là ICEbreaker🌸. Dán API Key vào ô trên rồi hỏi code Lua Roblox đi, tao cân hết!</div>
+    <div class="msg ai-msg">Chào mày! Dán Key rồi nhấn LƯU KEY để bắt đầu.</div>
 </div>
 
 <div class="input-box">
-    <input type="text" id="user-input" placeholder="Nhắn tin cho AI...">
+    <input type="text" id="user-input" placeholder="Hỏi code Lua...">
     <button id="send-btn" onclick="handleSend()">GỬI</button>
 </div>
 
 <script>
-    // 1. Hiệu ứng hoa rơi
-    for(let i=0; i<15; i++) {
-        let flower = document.createElement('div');
-        flower.className = 'sakura';
-        flower.style.left = Math.random() * 100 + 'vw';
-        flower.style.width = flower.style.height = Math.random() * 7 + 5 + 'px';
-        flower.style.animationDuration = Math.random() * 4 + 3 + 's';
-        flower.style.animationDelay = Math.random() * 5 + 's';
-        document.body.appendChild(flower);
+    window.onload = () => {
+        const savedKey = localStorage.getItem('icebreaker_key');
+        if (savedKey) {
+            document.getElementById('api-key').value = savedKey;
+            addMessage("🌸 Đã tự động nhận Key.", "ai-msg");
+        }
+    };
+
+    function saveKey() {
+        const key = document.getElementById('api-key').value;
+        localStorage.setItem('icebreaker_key', key);
+        alert("Đã lưu Key!");
     }
 
-    const chatWindow = document.getElementById('chat-window');
-    const userInput = document.getElementById('user-input');
-    const apiKeyInput = document.getElementById('api-key');
-
-    // 2. Hàm thêm tin nhắn vào màn hình
     function addMessage(content, className, id = null) {
         const div = document.createElement('div');
         div.className = `msg ${className}`;
         if(id) div.id = id;
         div.innerHTML = content;
-        chatWindow.appendChild(div);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+        document.getElementById('chat-window').appendChild(div);
+        document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
     }
 
-    // 3. Hàm xử lý gửi tin nhắn & Gọi API
     async function handleSend() {
-        const text = userInput.value.trim();
-        const key = apiKeyInput.value.trim();
+        const text = document.getElementById('user-input').value.trim();
+        const key = localStorage.getItem('icebreaker_key') || document.getElementById('api-key').value.trim();
 
-        if(!text) return;
-        if(!key) {
-            alert("Mày chưa dán API Key kìa, lấy đâu ra não mà trả lời!");
-            return;
-        }
+        if(!text || !key) return;
 
         addMessage(text, 'user-msg');
-        userInput.value = '';
+        document.getElementById('user-input').value = '';
 
         const loadingId = "loading-" + Date.now();
-        addMessage("🌸 ICEbreaker đang viết code...", "ai-msg", loadingId);
+        addMessage("🌸...", "ai-msg", loadingId);
 
         try {
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${key}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                 body: JSON.stringify({
                     model: "gpt-3.5-turbo",
                     messages: [
-                        {role: "system", content: "Mày là ICEbreaker, AI chuyên gia về Roblox Lua. Nói chuyện kiểu thân mật mày tao với người dùng Việt Nam."},
+                        {role: "system", content: "Mày là ICEbreaker, AI chuyên Lua Roblox. Nói chuyện mày tao."},
                         {role: "user", content: text}
-                    ],
-                    temperature: 0.8
+                    ]
                 })
             });
-
             const data = await response.json();
-            const loadingMsg = document.getElementById(loadingId);
-            if(loadingMsg) loadingMsg.remove();
-
-            if (data.choices && data.choices[0]) {
-                let aiReply = data.choices[0].message.content;
-                // Format lại các đoạn code cho đẹp
-                aiReply = aiReply.replace(/```(?:lua)?([\s\S]*?)
-```/g, '<pre>$1</pre>');
-                aiReply = aiReply.replace(/\n/g, '<br>'); // Giữ xuống dòng
-                addMessage(aiReply, 'ai-msg');
-            } else {
-                addMessage("Lỗi API rồi mày! Check lại Key hoặc tiền trong acc nhé.", "ai-msg");
-            }
-
-        } catch (error) {
-            const loadingMsg = document.getElementById(loadingId);
-            if(loadingMsg) loadingMsg.remove();
-            addMessage("Mạng bị quái gì rồi, không gọi AI được mày ơi!", "ai-msg");
+            document.getElementById(loadingId).remove();
+            let res = data.choices[0].message.content.replace(/```(?:lua)?([\s\S]*?)
+```/g, '<pre>$1</pre>').replace(/\n/g, '<br>');
+            addMessage(res, 'ai-msg');
+        } catch (e) {
+            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+            addMessage("Lỗi kết nối!", "ai-msg");
         }
     }
 
-    // Nhấn Enter để gửi cho lẹ
-    userInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") handleSend();
-    });
+    for(let i=0; i<15; i++) {
+        let f = document.createElement('div'); f.className = 'sakura';
+        f.style.left = Math.random()*100+'vw'; f.style.width = f.style.height = Math.random()*7+5+'px';
+        f.style.animationDuration = Math.random()*4+3+'s'; document.body.appendChild(f);
+    }
+    document.getElementById('user-input').addEventListener("keypress", (e) => { if(e.key === "Enter") handleSend(); });
 </script>
-
 </body>
 </html>
