@@ -3,156 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICEbreaker🌸 AI</title>
+    <title>Lua Script Pro - Dashboard</title>
     <style>
-        /* Giao diện chuẩn Dark Mode cực ngầu */
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background-color: #0b0e11; 
-            color: #ffffff; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-        }
-        header { 
-            background: #1e2327; 
-            padding: 15px; 
-            text-align: center; 
-            font-size: 1.4rem; 
-            font-weight: bold; 
-            color: #ff85a2; 
-            border-bottom: 2px solid #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        #chat-box { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px;
-            scroll-behavior: smooth;
-        }
-        /* Style tin nhắn */
-        .message { max-width: 85%; padding: 12px 18px; border-radius: 20px; line-height: 1.5; font-size: 16px; position: relative; }
-        .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 4px; }
-        .bot { align-self: flex-start; background: #2a2e33; color: #ff85a2; border-bottom-left-radius: 4px; border: 1px solid #444; }
+        :root { --primary: #00ffa3; --bg: #0f0f0f; --card: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; }
         
-        /* Khu vực nhập liệu */
-        .input-area { 
-            padding: 20px; 
-            background: #1e2327; 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid #333;
-        }
-        input { 
-            flex-grow: 1; 
-            padding: 14px; 
-            border-radius: 12px; 
-            border: 1px solid #444; 
-            background: #2c3136; 
-            color: white; 
-            outline: none;
-            font-size: 16px;
-        }
-        input:focus { border-color: #ff85a2; box-shadow: 0 0 5px #ff85a2; }
-        button { 
-            padding: 10px 25px; 
-            background: #ff85a2; 
-            border: none; 
-            border-radius: 12px; 
-            color: white; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: all 0.2s;
-        }
-        button:hover { background: #ff4f7b; transform: scale(1.05); }
-        button:active { transform: scale(0.95); }
+        h2 { text-align: center; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
 
-        /* Hiệu ứng gõ chữ của Bot */
-        .typing { font-style: italic; font-size: 14px; color: #888; }
+        /* Thanh tìm kiếm cao cấp */
+        .search-wrapper { position: relative; margin-bottom: 30px; }
+        #searchBar {
+            width: 100%; padding: 15px 20px; border-radius: 12px; border: 1px solid #333;
+            background: rgba(255,255,255,0.05); color: white; outline: none; font-size: 16px;
+            transition: 0.3s; box-sizing: border-box;
+        }
+        #searchBar:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 163, 0.2); }
+
+        /* Lưới hiển thị Card */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        .script-card {
+            background: var(--card); border-radius: 16px; padding: 20px;
+            border: 1px solid #222; position: relative; transition: 0.3s;
+        }
+        .script-card:hover { transform: translateY(-5px); border-color: #444; }
+
+        .tag {
+            font-size: 10px; padding: 3px 8px; border-radius: 4px;
+            text-transform: uppercase; font-weight: bold; float: right;
+        }
+        .tag-working { background: rgba(0, 255, 163, 0.2); color: var(--primary); }
+        .tag-patched { background: rgba(255, 60, 60, 0.2); color: #ff3c3c; }
+
+        .game-title { font-size: 1.1em; font-weight: 600; margin-bottom: 15px; display: block; }
+        
+        .code-box {
+            background: #000; padding: 12px; border-radius: 8px;
+            font-family: 'Fira Code', monospace; font-size: 12px;
+            margin-bottom: 15px; border: 1px solid #222;
+            color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .copy-btn {
+            width: 100%; background: var(--primary); color: #000; border: none;
+            padding: 10px; border-radius: 8px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
+        }
+        .copy-btn:hover { background: #00d689; }
+
+        /* Thông báo nhỏ */
+        #toast {
+            visibility: hidden; min-width: 200px; background-color: var(--primary);
+            color: #000; text-align: center; border-radius: 8px; padding: 12px;
+            position: fixed; z-index: 1; bottom: 30px; font-weight: bold;
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
-<header>ICEbreaker 🌸 AI</header>
-
-<div id="chat-box">
-    <div class="message bot">Chào mày, ICEbreaker🌸 đây! Hôm nay có gì vui không, kể tao nghe để tao "phá băng" giúp mày nào!</div>
-</div>
-
-<div class="input-area">
-    <input type="text" id="user-input" placeholder="Viết gì đó đi mày..." autocomplete="off">
-    <button id="send-btn">Gửi</button>
-</div>
-
-<script type="module">
-    // Import thư viện từ Google
-    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-
-    // 1. DÁN API KEY CỦA MÀY VÀO ĐÂY (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-    const API_KEY = "AIzaSyDyhGiqcYqYujZy44XxS_vAG2ioyGM4m0A"; 
+<div class="container">
+    <h2>LUA SCRIPT HUB</h2>
     
-    const genAI = new GoogleGenerativeAI(API_KEY);
+    <div class="search-wrapper">
+        <input type="text" id="searchBar" placeholder="Gõ tên game mày muốn tìm..." onkeyup="filterScripts()">
+    </div>
 
-    const chatBox = document.getElementById("chat-box");
-    const userInput = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
+    <div class="grid" id="scriptList">
+        <!-- Script 1 -->
+        <div class="script-card">
+            <span class="tag tag-working">Working</span>
+            <span class="game-title">Murder Mystery 2</span>
+            <div class="code-box" id="c1">loadstring(game:HttpGet("https://raw.githubusercontent.com/mm2-best"))()</div>
+            <button class="copy-btn" onclick="copyCode('c1')">COPY SCRIPT</button>
+        </div>
 
-    async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
+        <!-- Script 2 -->
+        <div class="script-card">
+            <span class="tag tag-patched">Patched</span>
+            <span class="game-title">Blox Fruit</span>
+            <div class="code-box" id="c2">loadstring(game:HttpGet("https://blox-hub.com/main"))()</div>
+            <button class="copy-btn" onclick="copyCode('c2')" style="opacity:0.5; cursor:not-allowed;">FIXING...</button>
+        </div>
+    </div>
+</div>
 
-        // Hiện tin nhắn của mày
-        appendMessage(text, 'user');
-        userInput.value = "";
+<div id="toast">Đã copy rồi đó mày! 🚀</div>
 
-        // Hiện hiệu ứng đang chờ
-        const typingDiv = document.createElement("div");
-        typingDiv.className = "message bot typing";
-        typingDiv.innerText = "ICEbreaker🌸 đang suy nghĩ...";
-        chatBox.appendChild(typingDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+<script>
+    function copyCode(id) {
+        const code = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            var x = document.getElementById("toast");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        });
+    }
 
-        try {
-            // SỬA LỖI 404: Dùng tên model đầy đủ
-            // Nếu vẫn lỗi 404, mày hãy thử đổi "gemini-1.5-flash-latest" thành "gemini-pro"
-            const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash-latest" 
-            });
-
-            const prompt = `Bạn tên là ICEbreaker🌸. Bạn là một chatbot cá tính, hài hước và dùng ngôn ngữ thân mật (mày, tao) để trò chuyện với người dùng Việt Nam. Nội dung: ${text}`;
-
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const botResponse = response.text();
-
-            // Xóa hiệu ứng chờ và hiện câu trả lời
-            chatBox.removeChild(typingDiv);
-            appendMessage(botResponse, 'bot');
-
-        } catch (error) {
-            chatBox.removeChild(typingDiv);
-            console.error("Lỗi rồi:", error);
-            appendMessage("Lỗi rồi mày ơi: " + error.message, 'bot');
+    function filterScripts() {
+        let input = document.getElementById('searchBar').value.toLowerCase();
+        let cards = document.getElementsByClassName('script-card');
+        for (let i = 0; i < cards.length; i++) {
+            let title = cards[i].querySelector('.game-title').innerText.toLowerCase();
+            cards[i].style.display = title.includes(input) ? "" : "none";
         }
     }
-
-    function appendMessage(msg, sender) {
-        const div = document.createElement("div");
-        div.className = `message ${sender}`;
-        div.innerText = msg;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Sự kiện nhấn nút hoặc Enter
-    sendBtn.addEventListener("click", sendMessage);
-    userInput.addEventListener("keypress", (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
 </script>
 
 </body>
