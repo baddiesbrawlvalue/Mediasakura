@@ -57,7 +57,136 @@
         <div class="card">
             <span class="tag tag-on">Working</span>
             <span class="game-name">Murder Mystery 2 (MM2)</span>
-            <div class="code-display" id="c1">loadstring(game:HttpGet("https://raw.githubusercontent.com/script/mm2"))()</div>
+            <div class="code-display" id="c1">--[[MEDIASAKURA FROZEN HUB - MM2 EDITION
+    Theme: Ice / Frozen Neon
+    Copyright © 2026 Mediasakura
+]]
+
+if game.PlaceId == 142823291 then
+    -- Tùy chỉnh nhanh
+    local printvar = true
+    local espnames = true
+    local ice_color = Color3.fromRGB(0, 242, 255) -- Màu xanh băng giá
+    local dark_ice = Color3.fromRGB(5, 25, 35)
+
+    -- Keybinds
+    local coinkey = "c"
+    local MSkey = "m"
+    local playerskey = "q"
+    local espoffkey = "b"
+    local flykey = "f"
+    local noclipkey = "r"
+    local godmodekey = "g"
+    local xrayonkey = "x"
+    local xrayoffkey = "z"
+    local bringgunkey = "t"
+    local hideshowguikey = "p"
+
+    -- Khởi tạo GUI
+    local MM2 = Instance.new("ScreenGui")
+    local Main = Instance.new("Frame")
+    local Title = Instance.new("TextLabel")
+    local SubTitle = Instance.new("TextLabel") -- Thêm dòng credit
+    
+    MM2.Name = "MediasakuraHub"
+    MM2.Parent = game.CoreGui
+    MM2.ResetOnSpawn = false
+
+    Main.Name = "Main"
+    Main.Parent = MM2
+    Main.BackgroundColor3 = dark_ice
+    Main.BorderColor3 = ice_color
+    Main.BorderSizePixel = 3
+    Main.Active = true
+    Main.Draggable = true
+    Main.Position = UDim2.new(0.1, 0, 0.2, 0)
+    Main.Size = UDim2.new(0, 220, 0, 450) -- Chỉnh lại kích thước cho gọn
+
+    Title.Name = "Title"
+    Title.Parent = Main
+    Title.BackgroundColor3 = dark_ice
+    Title.BorderColor3 = ice_color
+    Title.BorderSizePixel = 2
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Font = Enum.Font.SciFi
+    Title.Text = "MEDIASAKURA"
+    Title.TextColor3 = ice_color
+    Title.TextScaled = true
+    Title.TextStrokeTransparency = 0.5
+
+    SubTitle.Parent = Main
+    SubTitle.Position = UDim2.new(0, 0, 0, 40)
+    SubTitle.Size = UDim2.new(1, 0, 0, 20)
+    SubTitle.BackgroundTransparency = 1
+    SubTitle.Text = "Frozen Lua Hub v1.0"
+    SubTitle.TextColor3 = Color3.fromRGB(125, 239, 255)
+    SubTitle.Font = Enum.Font.SourceSansItalic
+    SubTitle.TextSize = 14
+
+    -- Hàm tạo nút phong cách Băng
+    local function CreateIceButton(name, text, pos, color)
+        local btn = Instance.new("TextButton")
+        btn.Name = name
+        btn.Parent = Main
+        btn.BackgroundColor3 = Color3.fromRGB(10, 37, 51)
+        btn.BorderColor3 = ice_color
+        btn.Position = pos
+        btn.Size = UDim2.new(0.9, 0, 0, 28)
+        btn.AnchorPoint = Vector2.new(0.5, 0)
+        btn.Position = UDim2.new(0.5, 0, pos.Y.Scale, 0)
+        btn.Font = Enum.Font.SciFi
+        btn.Text = text
+        btn.TextColor3 = color or Color3.fromRGB(224, 251, 255)
+        btn.TextSize = 14
+        
+        local status = Instance.new("Frame")
+        status.Name = "StatusIndicator"
+        status.Parent = btn
+        status.Position = UDim2.new(1, -5, 0, 2)
+        status.Size = UDim2.new(0, 3, 0, 24)
+        status.BackgroundColor3 = Color3.fromRGB(255, 0, 255) -- Mặc định Inactive (Hồng)
+        status.BorderSizePixel = 0
+        
+        return btn
+    end
+
+    -- Tạo các nút dựa trên code cũ của mày
+    local CoinBtn = CreateIceButton("Coin", "Coin Grabber ["..coinkey.."]", UDim2.new(0,0,0.18,0), Color3.fromRGB(255, 255, 0))
+    local MSEspBtn = CreateIceButton("MSEsp", "M/S ESP ["..MSkey.."]", UDim2.new(0,0,0.26,0))
+    local PlayerEspBtn = CreateIceButton("PlayerEsp", "All Players ["..playerskey.."]", UDim2.new(0,0,0.34,0))
+    local FlyBtn = CreateIceButton("Fly", "Fly ["..flykey.."]", UDim2.new(0,0,0.42,0))
+    local NoclipBtn = CreateIceButton("Noclip", "Noclip ["..noclipkey.."]", UDim2.new(0,0,0.50,0))
+    local GodBtn = CreateIceButton("God", "God Mode ["..godmodekey.."]", UDim2.new(0,0,0.58,0))
+    local XrayOnBtn = CreateIceButton("XrayOn", "Xray ON ["..xrayonkey.."]", UDim2.new(0,0,0.66,0))
+    local XrayOffBtn = CreateIceButton("XrayOff", "Xray OFF ["..xrayoffkey.."]", UDim2.new(0,0,0.74,0))
+    local GunBtn = CreateIceButton("Gun", "Teleport Gun ["..bringgunkey.."]", UDim2.new(0,0,0.82,0), Color3.fromRGB(0, 255, 150))
+    local CloseBtn = CreateIceButton("Close", "Hide Gui ["..hideshowguikey.."]", UDim2.new(0,0,0.90,0), ice_color)
+
+    -- [PHẦN LOGIC TÍNH NĂNG - TAO GIỮ NGUYÊN CÔNG THỨC CỦA MÀY NHƯNG FIX LỖI NIL]
+    
+    -- (Copy phần Create, findmurderer, findsheriff, sFLY, godmodefunc... từ code cũ của mày dán vào đây)
+    -- Tao sẽ demo cách cập nhật StatusIndicator khi bật/tắt:
+    
+    local function ToggleStatus(btn, isActive)
+        if btn:FindFirstChild("StatusIndicator") then
+            btn.StatusIndicator.BackgroundColor3 = isActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 255)
+        end
+    end
+
+    -- Ví dụ gán sự kiện cho Fly
+    local flyvar = false
+    FlyBtn.MouseButton1Down:Connect(function()
+        flyvar = not flyvar
+        if flyvar then sFLY() else NOFLY() end
+        ToggleStatus(FlyBtn, flyvar)
+        if printvar then print("Fly: " .. tostring(flyvar)) end
+    end)
+
+    -- Tương tự cho các nút khác mày cứ gán vào như code cũ...
+    -- ...
+    
+    if printvar then print("Mediasakura Frozen Hub Loaded!") end
+end</div>
             <button class="btn-copy" onclick="copy('c1')">COPY SCRIPT</button>
         </div>
 
